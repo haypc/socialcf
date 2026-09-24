@@ -1,0 +1,30 @@
+name = "socialcf-api"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+workers_dev = true
+
+[vars]
+FRONTEND_ORIGIN = "https://haypc.github.io"
+MEDIA_BASE_URL = ""
+R2_ENDPOINT = "https://7ad60961950a76fe8d344479b47b8064.r2.cloudflarestorage.com"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "socialcf-db"
+database_id = "b03b6f39-2ca3-4067-8dd6-d3700643da59"
+migrations_dir = "../migrations"
+
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "socialcf-media"
+
+[[durable_objects.bindings]]
+name = "CHAT_ROOM"
+class_name = "ChatRoom"
+
+[[migrations]]
+tag = "v1"
+new_classes = ["ChatRoom"]
+
+[ai]
+binding = "AI"

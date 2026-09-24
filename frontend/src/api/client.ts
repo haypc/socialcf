@@ -1,0 +1,10 @@
+import axios from 'axios';
+
+export const API_URL = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, '') || 'http://localhost:8787';
+export const mediaUrl = (key?: string | null) => key ? `${API_URL}/api/media/${key.split('/').map(encodeURIComponent).join('/')}` : null;
+export const api = axios.create({ baseURL: API_URL, headers: { 'Content-Type': 'application/json' } });
+api.interceptors.request.use((config) => { const token = localStorage.getItem('socialcf_token'); if (token) config.headers.Authorization = `Bearer ${token}`; return config; });
+export const auth = { register: (data: {email:string;username:string;password:string;displayName?:string}) => api.post('/api/auth/register', data), login: (data: {email:string;password:string}) => api.post('/api/auth/login', data), me: () => api.get('/api/me') };
+export const postsApi = { feed: (cursor?: string) => api.get<{posts: import('./types').Post[]; nextCursor?: string}>('/api/feed', { params: cursor ? {cursor} : undefined }), get: (id: string) => api.get<import('./types').Post>(`/api/posts/${id}`), create: (data: {caption:string;mediaKey?:string}) => api.post('/api/posts', data), like: (id: string) => api.post<{liked:boolean;likesCount:number}>(`/api/posts/${id}/like`), comments: (id: string) => api.get<{comments: import('./types').Comment[]}>(`/api/posts/${id}/comments`), addComment: (id: string, body: string) => api.post(`/api/posts/${id}/comments`, {body}) };
+export const usersApi = { profile: (username: string) => api.get<import('./types').User & {posts: import('./types').Post[]}>(`/api/users/${username}`), follow: (id: string) => api.post<{following:boolean}>(`/api/follows/${id}`) };
+export const chatsApi = { list: () => api.get<{chats: import('./types').Chat[]}>('/api/chats'), create: (data: {type:'direct'|'group';name?:string;memberIds:string[]}) => api.post<import('./types').Chat>('/api/chats', data), messages: (id: string) => api.get<{messages: import('./types').Message[]}>(`/api/chat/${id}/messages`), presign: (data: {contentType:string;extension:string}) => api.post<{uploadUrl:string;key:string}>('/api/upload/presign', data) };
